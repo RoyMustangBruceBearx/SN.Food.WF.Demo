@@ -41,6 +41,13 @@ namespace SN.Food.WF.Demo.ComConfig
         private delegate void DispWeightDelegate(DateTime dateTime, string weight);
 
         /// <summary>
+        /// 定义一个代理
+        /// </summary>
+        /// <param name="weight">重量</param>
+        private delegate void DispShowWeightDelegate(string weight);
+
+
+        /// <summary>
         /// 定义一个函数，用于向窗体上的ListView控件添加内容
         /// </summary>
         /// <param name="iIndex"></param>
@@ -66,6 +73,26 @@ namespace SN.Food.WF.Demo.ComConfig
         }
 
         /// <summary>
+        /// 定义一个函数，用于向窗体上的ListView控件添加内容
+        /// </summary>
+        /// <param name="strMsg"></param>
+        private void DispShowWeight(string weight)
+        {
+            if (this.lstMain.InvokeRequired == false)                      
+            {
+                this.tbShowWeigth.Text = weight;
+            }
+            else                                                        
+            {
+                //通过使用Invoke的方法，让子线程告诉窗体线程来完成相应的控件操作
+                DispShowWeightDelegate DWD = new DispShowWeightDelegate(DispShowWeight);
+
+                //使用控件lstMain的Invoke方法执行DMSGD代理(其类型是DispMSGDelegate)
+                this.lstMain.Invoke(DWD, weight);
+            }
+        }
+
+        /// <summary>
         /// 定义一个线程函数，用于循环向列表中添加数据
         /// </summary>
         private void Thread_DisplayWeight()
@@ -73,7 +100,8 @@ namespace SN.Food.WF.Demo.ComConfig
             for (int i = 0; i < 10; i++)
             {
                 DispWeight(DateTime.Now, GenWeight(110).ToString("f1"));
-                Thread.Sleep(1000);
+                DispShowWeight(GenWeight(110).ToString("f2"));
+                Thread.Sleep(200);
             }
         }
 
@@ -97,7 +125,7 @@ namespace SN.Food.WF.Demo.ComConfig
                 }
             }
         }
-        private void btnThread_Click(object sender, EventArgs e)
+         private void btnThread_Click(object sender, EventArgs e)
         {
             //创建一个新的线程
             Thread tWorkingThread = new Thread(Thread_DisplayWeight);
